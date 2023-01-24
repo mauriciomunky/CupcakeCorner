@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct CheckoutView: View {
-    @ObservedObject var order: Order
+    @ObservedObject var order: Order.ObservedOrder
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
+    @State private var alertTitle = ""
     
     func placeOrder() async {
         let url = URL(string: "https://reqres.in/api/cupcakes")!
@@ -23,11 +24,15 @@ struct CheckoutView: View {
         }
         do {
             let (data, _) = try await URLSession.shared.upload(for: request, from: encoded)
-            let decodedOrder = try JSONDecoder().decode(Order.self, from: data)
-            confirmationMessage = "Your order for \(decodedOrder.quantity)x \(Order.types[decodedOrder.type].lowercased()) cupcakes is on its way!"
+            let decodedOrder = try JSONDecoder().decode(Order.ObservedOrder.self, from: data)
+            confirmationMessage = "Your order for \(decodedOrder.quantity)x \(Order.ObservedOrder.types[decodedOrder.type].lowercased()) cupcakes is on its way!"
             showingConfirmation = true
+            alertTitle = "Thank you!"
         } catch {
             print("Checkout failed.")
+            confirmationMessage = "Checkout failed."
+            showingConfirmation = true
+            alertTitle = "Error"
         }
     }
     var body: some View {
@@ -46,7 +51,7 @@ struct CheckoutView: View {
                     }
                 }.padding()
             }
-        }.navigationTitle("Check out").navigationBarTitleDisplayMode(.inline).alert("Thank you!", isPresented: $showingConfirmation) {
+        }.navigationTitle("Check out").navigationBarTitleDisplayMode(.inline).alert(alertTitle, isPresented: $showingConfirmation) {
             Button("OK") { }
         } message: {
             Text(confirmationMessage)
@@ -56,6 +61,6 @@ struct CheckoutView: View {
 
 struct CheckoutView_Previews: PreviewProvider {
     static var previews: some View {
-        CheckoutView(order: Order())
+        CheckoutView(order: Order.ObservedOrder())
     }
 }

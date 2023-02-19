@@ -43,7 +43,7 @@ struct CheckoutView: View {
                     image.resizable().scaledToFit()
                 } placeholder: {
                     ProgressView()
-                }.frame(height: 233)
+                }.frame(height: 233).accessibilityHidden(true)
                 Text("Your total is \(order.cost, format: .currency(code: Locale.current.currencyCode ?? "BRL"))").font(.title)
                 Button("Place Order") {
                     Task {
